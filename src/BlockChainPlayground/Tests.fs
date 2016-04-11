@@ -148,3 +148,31 @@ type OtherTypesOfOwnershipTests() =
     member test.``TransactionBuilder Stealth Coin Test``() = 
         let chapter = OtherTypesOfOwnership()
         chapter.``TransactionBuilder Stealth Coin``()
+
+[<TestFixture>]
+type OtherTypesOfAssetTests() = 
+
+    [<Test>]
+    member test.ColoredCoinsTests() = 
+        let chapter = OtherTypesOfAsset()
+        chapter.ColoredCoins()
+
+    [<Test>]
+    member test.TransferAssetsTests() = 
+        let chapter = OtherTypesOfAsset()
+        chapter.TransferAsset()
+
+    [<Test>]
+    member test.UnitTestsTests() = 
+        let chapter = OtherTypesOfAsset()
+        chapter.UnitTests()
+
+    [<Test>]
+    member test.LiquidDemocracyTests() = 
+        let chapter = OtherTypesOfAsset()
+        chapter.LiquidDemocracy()
+
+    [<Test>]
+    member test.ProofOfBurnAndReputationTests() = 
+        let chapter = OtherTypesOfAsset()
+        chapter.ProofOfBurnAndReputation()

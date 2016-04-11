@@ -4,10 +4,13 @@ open NBitcoin
 open NBitcoin.Crypto
 open NBitcoin.Protocol
 open NBitcoin.Stealth
+open NBitcoin.DataEncoders
+open NBitcoin.OpenAsset
 open System
 open System.Linq
 open System.Text
 open System.Threading
+open System.Collections.Generic
 
 type BitcoinTransfer() = 
 
@@ -508,3 +511,257 @@ type OtherTypesOfOwnership() =
         
         let verify = builder.Verify tx
         printfn "verify : %O" verify
+
+type OtherTypesOfAsset() = 
+
+    member __.ColoredCoins() = 
+
+        // Here is how to create my issuance coin
+        let coin = Coin(uint256 "eb49a599c749c82d824caf9dd69c4e359261d49bbb0b9d6dc18c59bc9214e43b", 
+                        0ul, 
+                        Money.Satoshis 2000000m, 
+                        Script(Encoders.Hex.DecodeData "76a914c81e8e7b7ffca043b088a992795b15887c96159288ac"))
+        let issuance = IssuanceCoin coin
+        printfn "issuance : %O" issuance
+
+        // Now I need to build transaction and sign the transaction with the help of the TransactionBuilder
+        let mutable nico = BitcoinAddress.Create("15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe");
+        let bookKey = BitcoinSecret "KyVVPaNYFWgSCwkvhMG3TruG1rUQ5o7J3fX7k8w7EepQuUQACfwE"
+        let builder = TransactionBuilder()
+        let tx = builder.AddKeys(bookKey)
+                        .AddCoins(issuance)
+                        .IssueAsset(nico, AssetMoney(issuance.AssetId, 10))
+                        .SendFees(Money.Coins 0.0001m)
+                        .SetChange(bookKey.GetAddress())
+                        .BuildTransaction(true)
+        
+        printfn "tx : %O" tx
+
+        use node = Node.ConnectToLocal Network.Main
+        node.VersionHandshake()
+        node.SendMessage(InvPayload(InventoryType.MSG_TX, tx.GetHash()));
+        node.SendMessage(TxPayload tx)
+        Thread.Sleep 500
+
+        nico <- BitcoinAddress.Create "15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe"
+        let coloredAddress = nico.ToColoredAddress()
+        printfn "coloredAddress : %O" coloredAddress
+
+        let book = BitcoinAddress.Create "1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB"
+        let assetId = AssetId(book).GetWif Network.Main
+        printfn "assetId : %O" assetId
+
+    member __.TransferAsset() = 
+
+        // Here is how to create my issuance coin
+        let coin = Coin(uint256 "fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842",
+                        0ul,
+                        Money.Satoshis 2000000m,
+                        Script(Encoders.Hex.DecodeData "76a914356fac-dac5f5bcae995d13e667bb5864fd1e7d5988ac"))
+        let assetId = BitcoinAssetId "AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e"
+
+        let colored = coin.ToColoredCoin(assetId, uint64 10)
+        printfn "colored : %O" colored
+
+        let book = BitcoinAddress.Create "1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB"
+        let nicoSecret = BitcoinSecret "KyVVPaNYFWgSCwkvhMG3TruG1rUQ5o7J3fX7k8w7EepQuUQACfwE"
+        let nico = nicoSecret.GetAddress() //15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe
+        let forFees = Coin(uint256("7f296e96ec3525511b836ace0377a9fbb723a47bdfb07c6bc3a6f2a0c23eba26"),
+                           0ul,
+                           Money.Satoshis 4425000m,
+                           Script(Encoders.Hex.DecodeData "76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac"))
+        let builder = TransactionBuilder()
+        
+        let tx = builder.AddKeys(nicoSecret)
+                        .AddCoins(colored, forFees)
+                        .SendAsset(book, AssetMoney(AssetId assetId, 10))
+                        .SetChange(nico)
+                        .SendFees(Money.Coins 0.0001m)
+                        .BuildTransaction(true)
+        printfn "tx : %O" tx
+
+    member __.UnitTests() = 
+
+        let gold = Key()
+        let silver = Key()
+        let goldId = gold.PubKey.ScriptPubKey.Hash.ToAssetId()
+        let silverId = silver.PubKey.ScriptPubKey.Hash.ToAssetId()
+
+        let bob = Key()
+        let alice = Key()
+        let satoshi = Key()
+
+        let init = Transaction()
+        init.Outputs.Add(TxOut(Money.Parse "1.0", gold))
+        init.Outputs.Add(TxOut(Money.Parse "1.0", silver))
+        init.Outputs.Add(TxOut(Money.Parse "1.0", satoshi))
+
+        let repo = NoSqlColoredTransactionRepository()
+        repo.Transactions.Put(init)
+        let mutable color = ColoredTransaction.FetchColors(init, repo)
+        printfn "color : %O" color
+
+        // Let’s use the two coins sent to Silver and Gold as Issuance Coins
+        let issuanceCoins = init.Outputs
+                                .AsCoins()
+                                .Take(2)
+                                .Select(fun c -> IssuanceCoin(c))
+                                .OfType<ICoin>()
+                                .ToArray()
+
+        // From that you can send Gold to Satoshi with the TransactionBuilder
+        let builder = TransactionBuilder()
+        let sendGoldToSatoshi = builder.AddKeys(gold)
+                                       .AddCoins(issuanceCoins.[0])
+                                       .IssueAsset(satoshi, AssetMoney(goldId, 10))
+                                       .SetChange(gold)
+                                       .BuildTransaction(true);
+        repo.Transactions.Put(sendGoldToSatoshi);
+        color <- ColoredTransaction.FetchColors(sendGoldToSatoshi, repo);
+        printfn "color : %O" color
+
+        // Firstly, he will fetch the ColoredCoin out of the transaction
+        let goldCoin = ColoredCoin.Find(sendGoldToSatoshi, color).FirstOrDefault()
+        
+        let builder2 = TransactionBuilder()
+        let sendToBobAndAlice = builder2.AddKeys(satoshi)
+                                        .AddCoins(goldCoin)
+                                        .SendAsset(alice, AssetMoney(goldId, 4))
+                                        .SetChange(satoshi)
+                                        .BuildTransaction(true)
+
+        let satoshiBtc = init.Outputs.AsCoins().Last()
+        let builder3 = new TransactionBuilder()
+        let sendToAlice = builder3.AddKeys(satoshi)
+                                  .AddCoins(goldCoin, satoshiBtc)
+                                  .SendAsset(alice, AssetMoney(goldId, 4))
+                                  .SetChange(satoshi)
+                                  .BuildTransaction(true)
+
+        repo.Transactions.Put(sendToAlice);
+        color <- ColoredTransaction.FetchColors(sendToAlice, repo);
+        printfn "sendToAlice : %O" sendToAlice
+        printfn "color : %O" color
+
+    member __.LiquidDemocracy() = 
+
+        let powerCoin = Key()
+        let alice = Key()
+        let bob = Key()
+        let satoshi = Key()
+
+        let init = Transaction()
+        init.Outputs.Add(TxOut(Money.Coins 1.0m, powerCoin))
+        init.Outputs.Add(TxOut(Money.Coins 1.0m, alice))
+        init.Outputs.Add(TxOut(Money.Coins 1.0m, bob))
+        init.Outputs.Add(TxOut(Money.Coins 1.0m, satoshi))
+
+        let repo = NoSqlColoredTransactionRepository()
+        repo.Transactions.Put(init)
+
+        let getCoins (tx : Transaction, owner : Key) : IEnumerable<Coin> = tx.Outputs.AsCoins().Where(fun c -> c.ScriptPubKey = owner.ScriptPubKey)
+
+        // Imagine that Alice buy 2 Power coins
+        let mutable issuance = getCoins(init, powerCoin).Select(fun c -> IssuanceCoin(c))
+        let builder = new TransactionBuilder()
+        let toAlice = builder.AddCoins(downcast issuance : IEnumerable<ICoin>)
+                             .AddKeys(powerCoin)
+                             .IssueAsset(alice, AssetMoney(powerCoin, int64 2))
+                             .SetChange(powerCoin)
+                             .Then()
+                             .AddCoins(downcast getCoins(init, alice) : IEnumerable<ICoin>)
+                             .AddKeys(alice)
+                             .Send(alice, Money.Coins 0.2m)
+                             .SetChange(alice)
+                             .BuildTransaction(true)
+        repo.Transactions.Put(toAlice)
+
+        // For some reason, Alice, might want to sell some of her voting power to Satoshi
+        let builder2 = new TransactionBuilder()
+        let toSatoshi = builder2.AddCoins(downcast ColoredCoin.Find(toAlice, repo) : IEnumerable<ICoin>)
+                                .AddCoins(downcast getCoins(init, alice) : IEnumerable<ICoin>)
+                                .AddKeys(alice)
+                                .SendAsset(satoshi, AssetMoney(powerCoin, int64 1))
+                                .SetChange(alice)
+                                .Then()
+                                .AddCoins(downcast getCoins(init, satoshi) : IEnumerable<ICoin>)
+                                .AddKeys(satoshi)
+                                .Send(alice, Money.Coins 0.1m)
+                                .SetChange(satoshi)
+                                .BuildTransaction(true);
+        repo.Transactions.Put(toSatoshi)
+
+        // First, I need to create some funds for voting coin
+        let votingCoin = Key()
+        let init2 = new Transaction()
+        
+        init2.Outputs.Add(TxOut(Money.Coins 1.0m, votingCoin))
+        repo.Transactions.Put(init2)
+
+        // Then, issue the voting coins
+        issuance <- getCoins(init2, votingCoin).Select(fun c -> new IssuanceCoin(c)).ToArray()
+        let builder3 = new TransactionBuilder()
+        let toVoters = builder3.AddCoins(downcast issuance : IEnumerable<ICoin>)
+                               .AddKeys(votingCoin)
+                               .IssueAsset(alice, AssetMoney(votingCoin, int64 1))
+                               .IssueAsset(satoshi, AssetMoney(votingCoin, int64 1))
+                               .SetChange(votingCoin)
+                               .BuildTransaction(true)
+        repo.Transactions.Put(toVoters)
+
+        // Alice decision is to handout her voting coin to someone she trusts having a better judgment on
+        // financial matter. She chooses to delegate her vote to Bob
+        let aliceVotingCoin = ColoredCoin.Find(toVoters, repo).Where(fun c -> c.ScriptPubKey = alice.ScriptPubKey)
+        let builder4 = new TransactionBuilder()
+        let toBob = builder4.AddCoins(downcast aliceVotingCoin : IEnumerable<ICoin>)
+                            .AddKeys(alice)
+                            .SendAsset(bob, AssetMoney(votingCoin, int64 1))
+                            .BuildTransaction(true)
+        repo.Transactions.Put(toBob)
+
+        // Boss says on the company’s website - Send your coins to 1HZwkjkeaoZfTSaJxDw6aKkxp45agDiEzN for yes 
+        // and to 1F3sAm6ZtwLAUnj7d38pGFxtP3RVEvtsbV for no.
+        // Bob decides that the company should take the loan
+        let bobVotingCoin = ColoredCoin.Find(toVoters, repo).Where(fun c -> c.ScriptPubKey = bob.ScriptPubKey)
+        let builder5 = new TransactionBuilder()
+        let vote = builder5.AddCoins(downcast bobVotingCoin : IEnumerable<ICoin>)
+                           .AddKeys(bob)
+                           .SendAsset(BitcoinAddress.Create "1HZwkjkeaoZfTSaJxDw6aKkxp45agDiEzN", AssetMoney(votingCoin, int64 1))
+                           .BuildTransaction(true)
+        printfn "vote : %O" vote
+
+        // Alternative: Use of Ricardian Contract
+        issuance <- getCoins(init2, votingCoin).Select(fun c -> new IssuanceCoin(c))
+        issuance.First().DefinitionUrl <- Uri "http://boss.com/vote01.json"
+        let builder6 = new TransactionBuilder()
+        let toVoters = builder6.AddCoins(downcast issuance : IEnumerable<ICoin>)
+                                .AddKeys(votingCoin)
+                                .IssueAsset(alice, AssetMoney(votingCoin, int64 1))
+                                .IssueAsset(satoshi, AssetMoney(votingCoin, int64 1))
+                                .SetChange(votingCoin)
+                                .BuildTransaction(true)
+        repo.Transactions.Put(toVoters)
+
+    member __.ProofOfBurnAndReputation() = 
+
+        let alice = Key()
+
+        // Giving some money to alice
+        let init = Transaction()
+        init.Outputs.Add(TxOut(Money.Coins 1.0m, alice))
+
+        let coin = init.Outputs.AsCoins().First()
+        
+        // Burning the coin
+        let burn = Transaction()
+        let txIn = TxIn(coin.Outpoint)
+        txIn.ScriptSig <- coin.ScriptPubKey
+        burn.Inputs.Add txIn
+
+        //Spend the previous coin
+        let message = "Burnt for \"Alice Bakery\"";
+        let opReturn = TxNullDataTemplate.Instance.GenerateScriptPubKey(Encoding.UTF8.GetBytes message)
+        burn.Outputs.Add(TxOut(Money.Coins 1.0m, opReturn))
+        burn.Sign(alice, false)
+
+
