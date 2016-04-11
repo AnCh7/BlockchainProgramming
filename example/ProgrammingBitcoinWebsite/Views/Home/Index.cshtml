@@ -1,0 +1,65 @@
+﻿@model ProgrammingBitcoinFunding.Models.MakersModel
+@{
+    ViewBag.Title = "Home";
+}
+<style>
+    img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border-color: black;
+        border-width: thin;
+        border-style: solid;
+    }
+</style>
+<h2>Blockchain Programming in C#</h2>
+<p>Dear developers, and Bitcoin addicts,</p>
+<p>
+    I wrote Blockchain Programming in C#, so I hope you too, hobbyist, startup and big corporation will move the block forwards.<br />
+    I get too much questions and requests for helping everyone to build on the Blockchain.
+    But sadly, I only have 24H per day, no matter how much coffee I drink.
+</p>
+<p>Writing is the most scalable way to share my knowledge. And coherently with such a goal my work is under CC (ASA 3U), so you are free to share. (and encouraged to do so)</p>
+<a href="https://aois.blob.core.windows.net/public/Blockchain Programming in CSharp.pdf"><img alt="download" src="~/Content/BlockchainProgramming.png" /></a>
+<a href="https://aois.blob.core.windows.net/public/Blockchain Programming in CSharp.pdf" style="text-align:center;display:block;">Download PART I&II (Blockchain Programming in CSharp.pdf)</a>
+<h2>Code examples</h2>
+<p>The book contains multiple example about how to use NBitcoin. Moreover, this website is itself open source, so you can take a look and play with it by yourself.</p>
+<a href="https://github.com/NicolasDorier/BlockchainProgramming"><img alt="source" width="250" src="~/Content/Octocat.png" /></a>
+<h2>Hall of the Makers</h2>
+<p>As you will read the book, you will have some challenges.</p>
+<p>For the first challenge, you need to send me at least <b>0.004 BTC</b> on <b><a href="http://api.qbit.ninja/balances/1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB">1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB</a></b> with some <b>kind words in the OP_RETURN</b> of your transaction.</p>
+<p>This money goes into my "Coffee and Sushi Wallet" that will keep me fed and compliant while writing the rest of the book.</p>
+<p>You can download the first part of the book for free to know how.</p>
+<p>Here are the true makers that cleared the task, ordered by success, generosity then time (confirmed only):</p>
+<p><b>Current block height</b>: @Model.Height (@Model.Time)</p>
+    <div>
+        <table class="table">
+            <tr>
+                <th>Position</th>
+                <th>Address</th>
+                <th>Amount</th>
+                <th>Kind Words</th>
+                <th>Transaction Id</th>
+            </tr>
+            @foreach(var maker in Model.Makers)
+            {
+
+                <tr>
+                    <td>@maker.Position</td>
+                    <td><a href="@maker.AddressUri">@maker.Address</a></td>
+                    <td>@maker.Amount</td>
+                    <td>@maker.KindWords</td>
+                    <td><a href="@maker.TransactionUri">Link</a></td>
+                    @*<td><a href="redeem?address=@maker.Address">Unlock Part 2</a></td>*@
+                </tr>
+            }
+
+        </table>
+
+    </div>
+    <p>PS: I've seen some people sending 0.004 BTC but forgetting the OP_RETURN. If you want me to return the BTC, ask me with your signature to refund it on <a href="https://bitcointalk.org/index.php?topic=926087.20">BTC Talk</a>.</p>
+    <p></p>
+
+
+
+

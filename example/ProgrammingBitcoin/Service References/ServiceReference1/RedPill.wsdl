@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://KnockKnock.readify.net" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:i0="http://tempuri.org/" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="RedPill" targetNamespace="http://KnockKnock.readify.net" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:import namespace="http://tempuri.org/" location="https://knockknock.readify.net/RedPill.svc?wsdl=wsdl0" />
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://KnockKnock.readify.net/Imports">
+      <xsd:import schemaLocation="https://knockknock.readify.net/RedPill.svc?xsd=xsd0" namespace="http://KnockKnock.readify.net" />
+      <xsd:import schemaLocation="https://knockknock.readify.net/RedPill.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="https://knockknock.readify.net/RedPill.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/System" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IRedPill_WhatIsYourToken_InputMessage">
+    <wsdl:part name="parameters" element="tns:WhatIsYourToken" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_WhatIsYourToken_OutputMessage">
+    <wsdl:part name="parameters" element="tns:WhatIsYourTokenResponse" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_FibonacciNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:FibonacciNumber" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_FibonacciNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:FibonacciNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_FibonacciNumber_ArgumentOutOfRangeExceptionFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/System" name="detail" element="q1:ArgumentOutOfRangeException" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_WhatShapeIsThis_InputMessage">
+    <wsdl:part name="parameters" element="tns:WhatShapeIsThis" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_WhatShapeIsThis_OutputMessage">
+    <wsdl:part name="parameters" element="tns:WhatShapeIsThisResponse" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_ReverseWords_InputMessage">
+    <wsdl:part name="parameters" element="tns:ReverseWords" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_ReverseWords_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ReverseWordsResponse" />
+  </wsdl:message>
+  <wsdl:message name="IRedPill_ReverseWords_ArgumentNullExceptionFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/System" name="detail" element="q2:ArgumentNullException" />
+  </wsdl:message>
+  <wsdl:portType name="IRedPill">
+    <wsdl:operation name="WhatIsYourToken">
+      <wsdl:input wsaw:Action="http://KnockKnock.readify.net/IRedPill/WhatIsYourToken" message="tns:IRedPill_WhatIsYourToken_InputMessage" />
+      <wsdl:output wsaw:Action="http://KnockKnock.readify.net/IRedPill/WhatIsYourTokenResponse" message="tns:IRedPill_WhatIsYourToken_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="FibonacciNumber">
+      <wsdl:input wsaw:Action="http://KnockKnock.readify.net/IRedPill/FibonacciNumber" message="tns:IRedPill_FibonacciNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://KnockKnock.readify.net/IRedPill/FibonacciNumberResponse" message="tns:IRedPill_FibonacciNumber_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://KnockKnock.readify.net/IRedPill/FibonacciNumberArgumentOutOfRangeExceptionFault" name="ArgumentOutOfRangeExceptionFault" message="tns:IRedPill_FibonacciNumber_ArgumentOutOfRangeExceptionFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="WhatShapeIsThis">
+      <wsdl:input wsaw:Action="http://KnockKnock.readify.net/IRedPill/WhatShapeIsThis" message="tns:IRedPill_WhatShapeIsThis_InputMessage" />
+      <wsdl:output wsaw:Action="http://KnockKnock.readify.net/IRedPill/WhatShapeIsThisResponse" message="tns:IRedPill_WhatShapeIsThis_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ReverseWords">
+      <wsdl:input wsaw:Action="http://KnockKnock.readify.net/IRedPill/ReverseWords" message="tns:IRedPill_ReverseWords_InputMessage" />
+      <wsdl:output wsaw:Action="http://KnockKnock.readify.net/IRedPill/ReverseWordsResponse" message="tns:IRedPill_ReverseWords_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://KnockKnock.readify.net/IRedPill/ReverseWordsArgumentNullExceptionFault" name="ArgumentNullExceptionFault" message="tns:IRedPill_ReverseWords_ArgumentNullExceptionFault_FaultMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:service name="RedPill">
+    <wsdl:port name="BasicHttpBinding_IRedPill" binding="i0:BasicHttpBinding_IRedPill">
+      <soap:address location="http://knockknock.azurewebsites.net/RedPill.svc" />
+    </wsdl:port>
+    <wsdl:port name="BasicHttpsBinding_IRedPill" binding="i0:BasicHttpsBinding_IRedPill">
+      <soap:address location="https://knockknock.readify.net/RedPill.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,152 @@
+﻿@model ProgrammingBitcoinFunding.Models.ScriptCheckModel
+@{
+    ViewBag.Title = "Script Debugger";
+}
+
+<div class="row">
+    <h2>Script Debugger</h2>
+    <p>
+        This page is for creating your own bitcoin script, and check the result.<br />
+    </p>
+</div>
+<div class="row">
+
+    <form action="/savescript" method="post" class="form-inline">
+        <div class="form-group">            
+            @if(Model.SavedScriptLink != null)
+            {
+                <span style="font-weight:bold">Script address: @Model.SavedScriptLink</span>
+            }
+        </div>        
+    </form>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Inputs</h3>
+        <div class="row">
+            <form action="/checkscript" method="post" class="form-horizontal col-md-12">
+                <div class="form-group">
+                    <div class="col-md-4 control-label">
+                        @Html.LabelFor(m => m.ScriptSig, new
+   {
+       @class = "control-label"
+   })
+                        <a href="#" data-toggle="tooltip" title="Script with placeholder like &lt;Alice.Property&gt; where Property can be Pubkey, Pubkeyhash, Key, Signature[;N]. In the case of signature, the optional N specify the OP_CODESEPARATOR used to compute the ScriptCode. If N is -1 or default, the whole scriptPubKey is used.">?</a>
+                    </div>
+                    <div class="col-md-8">
+                        @Html.TextAreaFor(o => o.ScriptSig, 3, 200, null)
+                        @Html.ValidationMessageFor(m => m.ScriptSig)
+                    </div>
+                </div>               
+                <div class="form-group">
+                    @Html.LabelFor(m => m.ScriptPubKey, new
+   {
+       @class = "col-md-4 control-label"
+   })
+                    <div class="col-md-8">
+                        @Html.TextAreaFor(o => o.ScriptPubKey, 5, 200, null)
+                        @Html.ValidationMessageFor(m => m.ScriptPubKey)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-4 col-md-8">
+                        <input type="submit" value="Run" class="btn btn-success" name="Run" />
+                        <input type="submit" value="Share" class="btn btn-info" name="Share" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@if(Model.Result != null)
+{
+    <div class="row">
+
+        <h3>Result</h3>
+        <table class="table">
+            <colgroup>
+                <col class="col-md-1" />
+                <col class="col-md-11" />
+            </colgroup>
+            <tr>
+                <th>Validation</th>
+                <td>
+                    @if(Model.Result.Success)
+                    { <span style="color:green">Valid</span>
+                    }
+                    else
+                    {
+                        <span style="color:red">Invalid (@Model.Result.Error)</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>ScriptSig</th>
+                <td style="max-width:100px;word-wrap:break-word;">@Model.ExecutedScriptSig</td>
+            </tr>
+            <tr>
+                <th>ScriptPubKey</th>
+                <td>@Model.ExecutedScriptPubKey</td>
+            </tr>
+            <tr>
+                <th>Transaction</th>
+                <td style="max-width:100px;word-wrap:break-word;">@Model.Transaction</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="row">
+
+        <h3>Stack</h3>
+        <table class="table">
+            <thead class="thead-inverse">
+                <tr>
+                    <th>Depth</th>
+                    <th>Hex</th>
+                    <th>Bool</th>
+                    <th>Number (Decimal)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(int i = 0; i < Model.Result.StackValues.Length; i++)
+                {
+                    <tr>
+                        <th class="col-md-2">@(-(i + 1))</th>
+                        <td>@Model.Result.StackValues[i].Hex</td>
+                        <td>@Model.Result.StackValues[i].Bool</td>
+                        <td>@Model.Result.StackValues[i].Number</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <h3>CheckSig operations</h3>
+        <table class="table">
+            <colgroup>
+                <col class="col-md-4" />
+                <col class="col-md-4" />
+                <col class="col-md-4" />
+            </colgroup>
+            <thead class="thead-inverse">
+                <tr>
+                    <th>ScriptCode</th>
+                    <th>SignedHash</th>
+                    <th>Signature</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(int i = 0; i < Model.Result.CheckSigs.Length; i++)
+                {
+                    <tr>
+                        <td>@Model.Result.CheckSigs[i].ScriptCode</td>
+                        <td style="max-width:100px;word-wrap:break-word;">@Model.Result.CheckSigs[i].SignedHash</td>
+                        <td style="max-width:100px;word-wrap:break-word;">@Model.Result.CheckSigs[i].Signature</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+

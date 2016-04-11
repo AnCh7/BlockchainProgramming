@@ -1,0 +1,64 @@
+﻿@model ProgrammingBitcoinFunding.Models.MASTModel
+@{
+    ViewBag.Title = "MAST";
+}
+
+<h2>MAST</h2>
+<p>
+    An example of MAST implementation in 100 lines of code (<a href="https://www.irccloud.com/pastebin/0ZNKfNvC/">https://www.irccloud.com/pastebin/0ZNKfNvC/</a> )<br />
+    The idea is to decompose all the possible execution paths of a script, and make merkle tree from that. <br />
+    The wit commitment would need only the executed path and the partial merkle tree to it.
+</p>
+<p>Saving may be negative, but none executed sigops will not be counted for the block, and saving can be done by using Hash160 instead of Hash256 for the merkle tree.</p>
+<div class="row">
+    <div class="col-md-4">
+        <form action="/mast" method="post" class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(m => m.Script, new
+   {
+       @class = "col-md-3 control-label"
+   })
+                <div class="col-md-9">
+                    @Html.TextAreaFor(o => o.Script, 25, 300, null)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-3 col-md-10">
+                    <input type="submit" value="Decompose" class="btn btn-default" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@if(Model.DecomposedScripts != null)
+{
+    <h2>Script decomposition</h2>
+    <table class="table">
+        <tr><th>MerkleRoot</th><td>@Model.MerkleRoot</td></tr>
+        <tr><th>Script</th><td>@Model.Script</td></tr>
+        <tr><th>Size</th><td>@Model.FullScriptSize</td></tr>
+    </table>
+    for(int i = 0; i < Model.DecomposedScripts.Count; i++)
+    {
+        <h3>Script @i</h3>
+        <table class="table">
+            <colgroup>
+                <col class="col-md-1" />
+                <col class="col-md-11" />
+            </colgroup>
+            <tbody>
+                <tr><th>String</th><td>@Model.DecomposedScripts[i].Script</td></tr>
+                <tr><th>Bytes</th><td style="max-width:100px;word-wrap:break-word;"><div>@Model.DecomposedScripts[i].Bytes</div></td></tr>
+                <tr><th>Hash</th><td style="max-width:100px;word-wrap:break-word;">@Model.DecomposedScripts[i].Hash</td></tr>
+                <tr><th>PartialMerkleTree</th><td style="max-width:100px;word-wrap:break-word;">@Model.DecomposedScripts[i].PartialMerkleTree</td></tr>
+            </tbody>
+        </table>
+        <h4>Size of commitment (Merkle Tree + Script)</h4>
+        <table class="table">
+            <tr><th class="col-md-2">Size with HASH256</th><td>@Model.DecomposedScripts[i].Size</td></tr>
+            <tr><th>Saving with HASH256</th><td>@Model.DecomposedScripts[i].Saving %</td></tr>
+            <tr><th>Size with HASH160</th><td>@Model.DecomposedScripts[i].Size160</td></tr>
+            <tr><th>Saving with HASH160</th><td>@Model.DecomposedScripts[i].Saving160 %</td></tr>
+        </table>
+    }
+}

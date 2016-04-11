@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="NBitcoin.Stealth.StealthPayment">
+    <Position X="5.75" Y="8" Width="3" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NBitcoin.TransactionBuilder">
+    <Position X="1.5" Y="9.75" Width="3.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NBitcoin.EncryptedKeyResult">
+    <Position X="1.5" Y="2.25" Width="3.25" />
+    <Members>
+      <Property Name="Seed" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+  </Class>
+  <Class Name="NBitcoin.ExtKey">
+    <Position X="5.5" Y="2.75" Width="4.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NBitcoin.ExtPubKey">
+    <Position X="1.5" Y="4.5" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

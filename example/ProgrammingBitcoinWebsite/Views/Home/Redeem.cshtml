@@ -1,0 +1,17 @@
+﻿@model ProgrammingBitcoinFunding.Models.RedeemModel
+@{
+    ViewBag.Title = "Redeem";
+}
+
+<h2>Redeem</h2>
+<form method="post" action="/redeem">
+    <p>Sign the following challenge :  <input type="text" value="@Model.Challenge" readonly style="width:400px;" /></p>
+    <p>Your response : @Html.TextBoxFor(o=>o.Signature) @Html.ValidationMessageFor(o=>o.Signature)</p>
+    @Html.HiddenFor(o=>o.Address)
+    <input type="submit" value="Submit" />   
+</form>
+@Model.Message
+@if(!String.IsNullOrEmpty(Model.Link))
+{
+    <a href="@Model.Link">Link to Part II</a>
+}
